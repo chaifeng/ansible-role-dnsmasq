@@ -1,0 +1,55 @@
+- block:
+    - name: 'Ensure dnsmasq'
+      apt: name=dnsmasq,dnsutils
+
+    - name: 'Ensure service dnsmasq enabled'
+      service: name=dnsmasq enabled=yes state=running
+      tags:
+        - dnsmasq
+
+    - name: 'allow udp port 53'
+      ufw: rule=allow port=53 proto=udp
+  when: ansible_os_family == "Debian"
+
+- block:
+    - name: Ensure dnsmasq
+      homebrew: name=dnsmasq
+
+    - name: Ensure dnsmasq launch daemon
+      template: src=homebrew.mxcl.dnsmasq.plist.j2 dest=/Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
+      become: True
+      notify: 'Restart dnsmasq on {{ ansible_os_family }}'
+  when: ansible_os_family == "Darwin"
+
+- name: 'Dnsmasq main configurations'
+  template: src=dnsmasq.conf.j2 dest="{{ dnsmasq.conf }}"
+  notify: 'Restart dnsmasq on {{ ansible_os_family }}'
+  tags:
+    - dnsmasq
+    - config
+
+- name: 'Ensure dnsmasq.d'
+  file: path="{{ dnsmasq.conf_d }}" state=directory
+
+- name: 'Dnsmasq configurations'
+  copy: src=dnsmasq.d/ dest="{{ dnsmasq.conf_d }}/"
+  notify: 'Restart dnsmasq on {{ ansible_os_family }}'
+  tags:
+    - dnsmasq
+    - config
+
+- name: 'Dnsmasq resolv file'
+  copy: src=resolv.dnsmasq dest="{{ dnsmasq.resolv_file }}"
+  notify: 'Restart dnsmasq on {{ ansible_os_family }}'
+  when: dnsmasq.resolv_file is defined
+
+- name: 'Dnsmasq template configurations'
+  template: src=dnsmasq.d/{{ item }}.conf.j2 dest="{{ dnsmasq.conf_d }}/{{ item }}.conf"
+  with_items:
+    - 00-default-server
+    - china-websites-alexa
+    - ad
+  notify: 'Restart dnsmasq on {{ ansible_os_family }}'
+  tags:
+    - dnsmasq
+    - config

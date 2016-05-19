@@ -1,0 +1,10 @@
+no-resolv
+{% for upstream_server in dnsmasq.upstream_servers %}
+server={{ upstream_server }}
+{% endfor %}
+proxy-dnssec
+min-cache-ttl=1800
+auth-ttl=3600
+cache-size=65535
+
+server=/.cn/{{ dnsmasq.cn_upstream_server }}

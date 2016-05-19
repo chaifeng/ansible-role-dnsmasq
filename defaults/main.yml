@@ -1,0 +1,13 @@
+upstream_server: "127.0.0.1#1053"
+dnsmasq:
+  exec: /usr/sbin/dnsmasq
+  conf: /etc/dnsmasq.conf
+  conf_d: /etc/dnsmasq.d
+  listen_address: 0.0.0.0
+  # resolv_file: /etc/resolv.dnsmasq
+  upgream_servers: []
+  cn_upstream_server: 8.8.8.8
+  # log_file: /var/log/dnsmasq.log
+
+dnsmasq_adsites:
+  - cnzz.com

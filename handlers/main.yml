@@ -1,0 +1,9 @@
+- name: 'Restart dnsmasq on Debian'
+  service: name=dnsmasq state=restarted
+
+- name: 'Restart dnsmasq on Darwin'
+  become: True
+  shell: |
+    launchctl list homebrew.mxcl.dnsmasq >/dev/null \
+      && launchctl unload /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
+    launchctl load /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
